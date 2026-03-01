@@ -15,6 +15,17 @@ class ConstructorArchivoWav {
         std::uint16_t m_canales{1};
         std::uint32_t m_segundosDuracion{1};
         IGeneradorMuestra* m_generador{nullptr};
+
+        void escribirCabecera(
+            EscrituraBinaria& escritor,
+            std::uint32_t sizeData
+        ) const;
+
+        void escribirMuestra(
+            EscrituraBinaria& escritor,
+            std::uint32_t totalMuestra
+        ) const;
+
     public:
         ConstructorArchivoWav& setTasaMuestra(std::uint32_t tasa);
         
