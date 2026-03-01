@@ -1,0 +1,38 @@
+# Ignorar archivos generados por CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+.ninja_deps
+.ninja_log
+*.ninja
+Makefile
+*.cmake
+
+# Ignorar archivos generados por el compilador
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+*.lib
+
+# Ignorar archivos de depuracion
+*.dSYM/
+*.pdb
+
+# Ignorar archivos de IDE
+.vscode/
+.idea/
+*.proj
+*.sln
+*.suo
+
+# Ignorar archivos del sistema
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Ignorar directorio
+build/
