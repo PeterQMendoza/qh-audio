@@ -1,16 +1,21 @@
 #pragma once
 
 template <std::floating_point T>
-constexpr OsciladorSeno<T>::OsciladorSeno(
+OsciladorSeno<T>::OsciladorSeno(
     T frecuencia,
     T amplitud,
     T tasaMuestra
 ) noexcept
 : m_frecuencia(frecuencia),
 m_amplitud(amplitud),
-m_tasaMuestra(tasaMuestra),
-m_incrementoFase(dos_pi * frecuencia / tasaMuestra)
+m_tasaMuestra(tasaMuestra)
 {
+    actualizarIncremento();
+}
+
+template <std::floating_point T>
+void OsciladorSeno<T>::actualizarIncremento() noexcept {
+    m_incrementoFase = dos_pi * m_frecuencia / m_tasaMuestra;
 }
 
 template <std::floating_point T>
@@ -27,27 +32,32 @@ T OsciladorSeno<T>::proceso() noexcept {
 }
 
 template <std::floating_point T>
-constexpr void OsciladorSeno<T>::reset() noexcept {
+void OsciladorSeno<T>::reset() noexcept {
     m_fase = T{0};
 }
 
 template <std::floating_point T>
-constexpr void OsciladorSeno<T>::setFrecuencia(T frecuencia) noexcept {
+void OsciladorSeno<T>::setFrecuencia(T frecuencia) noexcept {
     m_frecuencia = frecuencia;
-    m_incrementoFase = dos_pi * frecuencia / m_tasaMuestra;
+    actualizarIncremento();
 }
 
 template <std::floating_point T>
-constexpr void OsciladorSeno<T>::setAmplitud(T amplitud) noexcept {
+void OsciladorSeno<T>::setAmplitud(T amplitud) noexcept {
     m_amplitud = amplitud;
 }
 
 template <std::floating_point T>
-constexpr T OsciladorSeno<T>::frecuencia() const noexcept {
+T OsciladorSeno<T>::frecuencia() const noexcept {
     return m_frecuencia;
 }
 
 template <std::floating_point T>
-constexpr T OsciladorSeno<T>::amplitud() const noexcept {
-    return amplitud;
+T OsciladorSeno<T>::amplitud() const noexcept {
+    return m_amplitud;
+}
+
+template <std::floating_point T>
+double OsciladorSeno<T>::siguienteMuestra() {
+    return static_cast<double>(proceso());
 }

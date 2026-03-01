@@ -1,14 +1,19 @@
 #include "vca.hpp"
 
-VCA::VCA(
-    IGeneradorMuestra& entrada,
-    IGeneradorMuestra& control
-)
-    : m_entrada(entrada),
-      m_control(control)
+VCA::VCA()
 {
 }
 
 double VCA::siguienteMuestra(){
-    return m_entrada.siguienteMuestra() * m_control.siguienteMuestra();
+    if (!m_audio || !m_modulador){
+        return 0.0;
+    }
+    return m_audio->siguienteMuestra() * m_modulador->siguienteMuestra();
+}
+
+void VCA::setEntradaAudio(IGeneradorMuestra& in){
+    m_audio = &in;
+}
+void VCA::setModulador(IGeneradorMuestra& modulador){
+    m_modulador = &modulador;
 }

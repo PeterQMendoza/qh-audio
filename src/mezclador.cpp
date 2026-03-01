@@ -5,10 +5,14 @@ void Mezclador::agregarEntrada(IGeneradorMuestra& modulo){
 }
 
 double Mezclador::siguienteMuestra(){
+    if (m_entradas.empty()){
+        return 0.0;
+    }
+
     double suma = 0.0;
 
     for (auto* modulo : m_entradas)
         suma += modulo->siguienteMuestra();
 
-    return suma;
+    return suma / m_entradas.size(); // normalizacion
 }

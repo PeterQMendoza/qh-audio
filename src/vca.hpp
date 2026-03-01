@@ -4,15 +4,15 @@
 
 class VCA final : public IGeneradorMuestra {
     // Amplificador controlado
+    private:
+        IGeneradorMuestra* m_audio{nullptr};
+        IGeneradorMuestra* m_modulador{nullptr};
     public:
-        VCA(
-            IGeneradorMuestra& entrada,
-            IGeneradorMuestra& control
-        );
+        VCA();
+
+        void setEntradaAudio(IGeneradorMuestra& in);
+        void setModulador(IGeneradorMuestra& mod);
 
         double siguienteMuestra() override;
 
-    private:
-        IGeneradorMuestra& m_entrada;
-        IGeneradorMuestra& m_control;
 };
