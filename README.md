@@ -2,11 +2,11 @@
     <img src="https://github.com/PeterQMendoza/qhawariy/blob/master/qhawariy/static/img/logo_qhawariy_color.svg" width="180px" height="180px">
 </p>
 
-# Procesador de imagenes
+# Construir wav
 ![C++](https://img.shields.io/badge/C++-00599C?style=for-the-badge&logo=C%2B%2B&logoColor=white)
 ![CMake](https://img.shields.io/badge/CMake-064F8C?style=for-the-badge&logo=cmake&logoColor=fff)
 
-Programa de procesador de imagenes
+Programa que construye archivo wav con c++
 
 ## Instalación
 1. Clona este repositorio:
