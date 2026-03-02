@@ -5,14 +5,18 @@ ADSR::ADSR(
     double decay,
     double sustain,
     double release,
-    double sampleRate
+    std::uint32_t tasaMuestra
 )
     : m_attack(attack),
       m_decay(decay),
       m_sustain(sustain),
       m_release(release),
-      m_sampleRate(sampleRate)
+      m_tasaMuestra(tasaMuestra)
 {
+    // incrementos lineales por muestra
+    m_attack  = (attack  > 0.0) ? 1.0 / (attack  * tasaMuestra) : 1.0;
+    m_decay   = (decay   > 0.0) ? (1.0 - sustain) / (decay * tasaMuestra) : 1.0;
+    m_release = (release > 0.0) ? sustain / (release * tasaMuestra) : 1.0;
 }
 
 void ADSR::noteOn(){
@@ -20,7 +24,9 @@ void ADSR::noteOn(){
 }
 
 void ADSR::noteOff(){
-    m_estado = Estado::Release;
+    if(m_estado != Estado::Idle){
+        m_estado = Estado::Release;
+    }
 }
 
 double ADSR::siguienteMuestra(){
@@ -30,7 +36,7 @@ double ADSR::siguienteMuestra(){
             break;
 
         case Estado::Attack:
-            m_nivel += 1.0 / (m_attack * m_sampleRate);
+            m_nivel += 1.0 / (m_attack * m_tasaMuestra);
             if (m_nivel >= 1.0)
             {
                 m_nivel = 1.0;
@@ -39,7 +45,7 @@ double ADSR::siguienteMuestra(){
             break;
 
         case Estado::Decay:
-            m_nivel -= (1.0 - m_sustain) / (m_decay * m_sampleRate);
+            m_nivel -= (1.0 - m_sustain) / (m_decay * m_tasaMuestra);
             if (m_nivel <= m_sustain)
             {
                 m_nivel = m_sustain;
@@ -51,7 +57,7 @@ double ADSR::siguienteMuestra(){
             break;
 
         case Estado::Release:
-            m_nivel -= m_sustain / (m_release * m_sampleRate);
+            m_nivel -= m_sustain / (m_release * m_tasaMuestra);
             if (m_nivel <= 0.0)
             {
                 m_nivel = 0.0;
@@ -61,4 +67,5 @@ double ADSR::siguienteMuestra(){
     }
 
     return m_nivel;
+
 }

@@ -29,7 +29,7 @@ App::App(){
     m_vca->setModulador(*m_env);
 
     m_constuctor = std::make_unique<ConstructorArchivoWav>();
-    m_motor = std::make_unique<MotorRender>(*m_vca, *m_env, *m_constuctor, m_tasaMuestra, m_duracion);
+    m_motor = std::make_unique<MotorRender>(*m_vca, *m_env, *m_constuctor, m_tasaMuestra, m_duracion, 80.0);
 
 }
 
