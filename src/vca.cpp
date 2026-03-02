@@ -35,6 +35,6 @@ std::vector<double> VCA::siguienteFrame()
     return std::vector<double>(m_canales, salida);
 }
 
-// std::uint16_t VCA::canales() const {
-//     return m_canales;
-// }
+std::uint16_t VCA::canales() const {
+    return m_canales;
+}

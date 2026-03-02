@@ -7,5 +7,5 @@ class IGeneradorMulticanal {
         virtual ~IGeneradorMulticanal() = default;
 
         virtual std::vector<double> siguienteFrame() = 0;
-        // virtual std::uint16_t canales() const = 0;
+        virtual std::uint16_t canales() const = 0;
 };

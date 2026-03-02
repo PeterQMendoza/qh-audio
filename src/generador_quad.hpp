@@ -17,5 +17,7 @@ class GeneradorQuad : public IGeneradorMulticanal {
             IGeneradorMuestra& c4
         );
 
+        std::uint16_t canales() const override;
+
         std::vector<double> siguienteFrame() override;
 };

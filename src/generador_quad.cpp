@@ -19,3 +19,7 @@ std::vector<double> GeneradorQuad::siguienteFrame()
         m_canales[3]->siguienteMuestra()
     };
 }
+
+std::uint16_t GeneradorQuad::canales() const {
+    return static_cast<std::uint16_t>(m_canales.size());
+}

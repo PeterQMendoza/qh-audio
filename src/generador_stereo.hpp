@@ -4,17 +4,22 @@
 #include "i_generador_muestra.hpp"
 
 #include <vector>
+#include <array>
 
 class GeneradorStereo : public IGeneradorMulticanal {
-private:
-    IGeneradorMuestra& m_left;
-    IGeneradorMuestra& m_right;
+    private:
+        IGeneradorMuestra& m_left;
+        IGeneradorMuestra& m_right;
 
-public:
-    GeneradorStereo(
-        IGeneradorMuestra& left,
-        IGeneradorMuestra& right
-    );
+        std::array<IGeneradorMuestra*, 2> m_canales;
 
-    std::vector<double> siguienteFrame() override;
+    public:
+        GeneradorStereo(
+            IGeneradorMuestra& left,
+            IGeneradorMuestra& right
+        );
+
+        std::uint16_t canales() const override;
+
+        std::vector<double> siguienteFrame() override;
 };

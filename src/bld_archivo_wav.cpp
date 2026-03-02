@@ -170,6 +170,7 @@ void ConstructorArchivoWav::escribirFrame(
     const std::vector<double>& frame
 ) const
 {
+    // std::cout << "Esperados: " << m_canales << " Recibidos: " << frame.size() << std::endl;
     if (frame.size() != m_canales)
         throw std::runtime_error("Frame inconsistente");
 

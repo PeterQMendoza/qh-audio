@@ -21,7 +21,7 @@ class VCA final : public IGeneradorMulticanal {
 
         void setCanales(std::uint16_t canales);
 
-        // std::uint16_t canales() const override;
+        std::uint16_t canales() const override;
 
         [[nodiscard]]
         std::vector<double> siguienteFrame() override;
