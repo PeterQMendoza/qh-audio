@@ -1,6 +1,8 @@
 #pragma once
 
 #include "i_generador_muestra.hpp"
+#include "i_generador_multicanal.hpp"
+
 #include "adsr.hpp"
 #include "bld_archivo_wav.hpp"
 
@@ -9,7 +11,7 @@
 
 class MotorRender final {
     private:
-        IGeneradorMuestra& m_generador;
+        IGeneradorMulticanal& m_generador;
         ADSR& m_env;
         ConstructorArchivoWav& m_wav;
         std::uint32_t m_tasaMuestra;
@@ -17,7 +19,7 @@ class MotorRender final {
 
     public:
         MotorRender(
-            IGeneradorMuestra& generador,
+            IGeneradorMulticanal& generador,
             ADSR& envolvente,
             ConstructorArchivoWav& wav,
             std::uint32_t tasaMuestra,
@@ -25,4 +27,9 @@ class MotorRender final {
         );
 
         void renderizar(const std::string& archivo);
+
+        void procesarAudio(
+            EscrituraBinaria& escritor,
+            std::uint32_t totalFrames
+        );
 };

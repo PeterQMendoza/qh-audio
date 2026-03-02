@@ -2,6 +2,8 @@
 
 #include <stdexcept>
 #include <algorithm>
+#include <cmath>
+#include <iostream>
 
 ConstructorArchivoWav& ConstructorArchivoWav::setTasaMuestra(
     std::uint32_t tasa
@@ -33,8 +35,8 @@ ConstructorArchivoWav& ConstructorArchivoWav::setBitProfundidad(
 ConstructorArchivoWav& ConstructorArchivoWav::setCanales(
     std::uint16_t canales
 ){
-    if (canales == 0){
-        throw std::invalid_argument("Numero de canales invalido");
+    if (canales == 0 || canales > 4){
+        throw std::invalid_argument("Canales permitidos: 1 a 4");
     }
     m_canales = canales;
     return *this;
@@ -51,9 +53,10 @@ ConstructorArchivoWav& ConstructorArchivoWav::setDuracion(
 }
 
 ConstructorArchivoWav& ConstructorArchivoWav::setGenerador(
-    IGeneradorMuestra& generador
+    IGeneradorMulticanal& generador
 ){
     m_generador = &generador;
+    // m_canales = generador.canales();// sicronizacion automatica
     return *this;
 }
 
@@ -64,27 +67,19 @@ void ConstructorArchivoWav::construir(const std::string& filename){
 
     EscrituraBinaria escritor(filename);
 
-    const std::uint32_t totalMuestras = m_tasaMuestra * m_segundosDuracion;
-    const std::uint16_t alinearBloque = m_canales * (m_bitProfundidad / 8);
-
-    const std::uint32_t sizeFragmentoDato = totalMuestras * alinearBloque;
+    const std::uint32_t totalFrames = m_tasaMuestra * m_segundosDuracion;
+    
+    const std::uint32_t sizeFragmentoDato = totalFrames * blockAlign();
 
     escribirCabecera(escritor, sizeFragmentoDato);
-    escribirMuestra(escritor, totalMuestras);
+    escribirDatos(escritor, totalFrames);
 }
 
 void ConstructorArchivoWav::escribirCabecera(
     EscrituraBinaria& escritor,
     std::uint32_t sizeData
 ) const {
-    const std::uint16_t blockAlign =
-        m_canales * (m_bitProfundidad / 8);
-
-    const std::uint32_t byteRate =
-        m_tasaMuestra * blockAlign;
-
-    const std::uint32_t riffSize =
-        36 + sizeData;
+    const std::uint32_t riffSize = 36 + sizeData;
 
     escritor.escribirCadena("RIFF");
     escritor.escribir(riffSize);
@@ -95,55 +90,104 @@ void ConstructorArchivoWav::escribirCabecera(
     escritor.escribir<std::uint16_t>(1);
     escritor.escribir(m_canales);
     escritor.escribir(m_tasaMuestra);
-    escritor.escribir(byteRate);
-    escritor.escribir(blockAlign);
+    escritor.escribir(byteRate());
+    escritor.escribir(blockAlign());
     escritor.escribir(m_bitProfundidad);
 
     escritor.escribirCadena("data");
     escritor.escribir(sizeData);
 }
 
+void ConstructorArchivoWav::escribirDatos(
+    EscrituraBinaria& escritor,
+    std::uint32_t totalFrames
+) const {
+    for (std::uint32_t i = 0; i < totalFrames; ++i){
+        escribirFrame(escritor, m_generador->siguienteFrame());
+    }
+}
+
 void ConstructorArchivoWav::escribirMuestra(
     EscrituraBinaria& escritor,
-    std::uint32_t totalMuestra
+    double muestra
 ) const {
-    for (std::uint32_t i = 0; i < totalMuestra; ++i)
+    const double clamped = std::clamp(muestra, -1.0, 1.0);
+
+    switch (m_bitProfundidad)
     {
-        double muestra = m_generador->siguienteMuestra();
-        muestra = std::clamp(muestra, -1.0, 1.0);
-
-        switch (m_bitProfundidad)
+        case 8:
         {
-            case 16:
-            {
-                constexpr double maxAmp = 32767.0;
-                const std::int16_t sample =
-                    static_cast<std::int16_t>(muestra * maxAmp);
+            // PCM 8-bit es unsigned
+            const std::uint8_t sample = static_cast<std::uint8_t>(
+                (clamped + 1.0) * 127.5
+            );
 
-                for (std::uint16_t c = 0; c < m_canales; ++c){
-                    escritor.escribir(sample);
-                }
-                break;
-            }
+            escritor.escribir(sample);
 
-            case 8:
-            {
-                // PCM 8-bit es unsigned
-                const std::uint8_t sample =
-                    static_cast<std::uint8_t>(
-                        (muestra + 1.0) * 127.5
-                    );
-
-                for (std::uint16_t c = 0; c < m_canales; ++c){
-                    escritor.escribir(sample);
-                }
-                break;
-            }
-
-            default:
-                throw std::runtime_error(
-                    "Bit profundidad no implementada"
-                );
+            break;
         }
+
+        case 16:
+        {
+            constexpr double maxAmp = 32767.0;
+            const std::int16_t sample = static_cast<std::int16_t>(clamped * maxAmp);
+
+            escritor.escribir(sample);
+            break;
+        }
+
+        case 24:
+        {
+            constexpr double maxAmp = 8388607.0;
+
+            std::int32_t sample =
+                static_cast<std::int32_t>(clamped * maxAmp);
+
+            escritor.escribir24Bits(sample);
+            break;
+        }
+
+        case 32:
+        {
+            constexpr double maxAmp = 2147483647.0;
+
+            const std::int32_t sample =
+                static_cast<std::int32_t>(clamped * maxAmp);
+
+            escritor.escribir(sample);
+            break;
+        }
+
+        default:
+            throw std::runtime_error(
+                "Bit profundidad no soportada"
+            );
     }
+}
+
+void ConstructorArchivoWav::escribirFrame(
+    EscrituraBinaria& escritor,
+    const std::vector<double>& frame
+) const
+{
+    if (frame.size() != m_canales)
+        throw std::runtime_error("Frame inconsistente");
+
+    for (double muestra : frame)
+    {
+        const double clamped =
+            std::clamp(muestra, -1.0, 1.0);
+
+        escribirMuestra(escritor, clamped);
+    }
+}
+
+std::uint16_t ConstructorArchivoWav::blockAlign() const noexcept
+{
+    return m_canales * (m_bitProfundidad / 8);
+}
+
+std::uint32_t ConstructorArchivoWav::byteRate() const noexcept
+{
+    return m_tasaMuestra * blockAlign();
 }

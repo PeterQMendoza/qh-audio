@@ -1,6 +1,8 @@
 #pragma once
 
 #include "i_generador_muestra.hpp"
+#include "i_generador_multicanal.hpp"
+
 #include "bld_archivo_wav.hpp"
 #include "adsr.hpp"
 #include "vca.hpp"
@@ -14,6 +16,11 @@ class App {
     private:
         std::unique_ptr<IGeneradorMuestra> m_generador1;
         std::unique_ptr<IGeneradorMuestra> m_generador2;
+        std::unique_ptr<IGeneradorMuestra> m_generador3;
+        std::unique_ptr<IGeneradorMuestra> m_generador4;
+
+        // std::unique_ptr<IGeneradorMulticanal> m_generador_stereo;
+        std::unique_ptr<IGeneradorMulticanal> m_generador_quad;
 
         std::unique_ptr<Mezclador> m_mezclador;
         

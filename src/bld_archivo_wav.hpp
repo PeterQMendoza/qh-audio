@@ -1,6 +1,7 @@
 #pragma once
 
 #include "i_generador_muestra.hpp"
+#include "i_generador_multicanal.hpp"
 #include "escritura_binaria.hpp"
 
 #include <vector>
@@ -14,8 +15,28 @@ class ConstructorArchivoWav {
         std::uint16_t m_bitProfundidad{16};
         std::uint16_t m_canales{1};
         std::uint32_t m_segundosDuracion{1};
-        IGeneradorMuestra* m_generador{nullptr};
+        IGeneradorMulticanal* m_generador{nullptr};
 
+        
+    public:
+        ConstructorArchivoWav& setTasaMuestra(std::uint32_t tasa);
+        
+        ConstructorArchivoWav& setBitProfundidad(std::uint16_t profundidad);
+        
+        ConstructorArchivoWav& setCanales(std::uint16_t canales);
+        
+        ConstructorArchivoWav& setDuracion(std::uint32_t segundos);
+        
+        ConstructorArchivoWav& setGenerador(IGeneradorMulticanal& generador);
+
+        void construir(const std::string& filename);
+
+        [[nodiscard]]
+        std::uint16_t blockAlign() const noexcept;
+
+        [[nodiscard]]
+        std::uint32_t byteRate() const noexcept;
+        
         void escribirCabecera(
             EscrituraBinaria& escritor,
             std::uint32_t sizeData
@@ -23,19 +44,16 @@ class ConstructorArchivoWav {
 
         void escribirMuestra(
             EscrituraBinaria& escritor,
-            std::uint32_t totalMuestra
+            double muestra
         ) const;
 
-    public:
-        ConstructorArchivoWav& setTasaMuestra(std::uint32_t tasa);
-        
-        ConstructorArchivoWav& setBitProfundidad(std::uint16_t profundidad);
-        
-        ConstructorArchivoWav& setCanales(std::uint16_t canales);
+        void escribirDatos(
+            EscrituraBinaria& escritor,
+            std::uint32_t totalFrames
+        ) const;
 
-        ConstructorArchivoWav& setDuracion(std::uint32_t segundos);
-
-        ConstructorArchivoWav& setGenerador(IGeneradorMuestra& generador);
-
-        void construir(const std::string& filename);
+        void escribirFrame(
+            EscrituraBinaria& escritor,
+            const std::vector<double>& frame
+        ) const;
 };
